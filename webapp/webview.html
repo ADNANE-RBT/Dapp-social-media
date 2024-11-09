@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>MiniSocial Enhanced</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+
+
+</head>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    h1, h2 {
+      color: #333;
+    }
+    
+    button {
+      background-color: #3161aa;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    
+    button#disconnectButton {
+      background-color: #f44336;
+    }
+    
+    input[type=text] {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    
+    #postsList {
+      list-style-type: none;
+      padding: 0;
+    }
+    
+    #postsList li {
+      background-color: white;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
+    
+    <body class="bg-gray-100">
+
+		  <!-- Navbar -->
+		<nav class="fixed top-0 left-0 z-50 w-full transition-all duration-300" x-data="{ open: false, isScrolling: false }"
+		  @scroll.window="isScrolling = window.scrollY > 0">
+	   <div :class="isScrolling ? 'bg-white' : 'bg-gray-800'" class="container mx-auto flex items-center justify-between p-4">
+		 <!-- Brand -->
+		 <a href="https://www.material-tailwind.com" target="_blank" class="text-lg font-bold" :class="isScrolling ? 'text-gray-800' : 'text-white'">
+			Anonym Social
+		 </a>
+   
+		 <!-- Desktop Menu -->
+		 <!-- <ul class="hidden lg:flex items-center gap-6 ml-10" :class="isScrolling ? 'text-gray-900' : 'text-white'">
+		   <li><a href="#" class="font-medium">Home</a></li>
+		   <li><a href="#" class="font-medium">Profile</a></li>
+		   <li><a href="#" class="font-medium">Trending</a></li>
+		 </ul>
+    -->
+		 <!-- Desktop Buttons -->
+		 <div class="hidden lg:flex items-center gap-2">
+			 <button class="px-4 py-2 rounded" :class="isScrolling ? 'bg-gray-600 text-white' : 'bg-white text-gray-600'" id="connectButton" onclick="connectWallet()">Log in </button>
+			 <button class="px-4 py-2 rounded" :class="isScrolling ? 'bg-gray-600 text-white' : 'bg-white text-gray-600'" id="disconnectButton" onclick="disconnectWallet()" style="display:none;">Disconnect</button>
+
+		 </div>
+   
+		 <!-- Mobile Toggle Button -->
+		 <button @click="open = !open" class="lg:hidden text-white focus:outline-none">
+		   <span x-show="!open" class="text-2xl">&#9776;</span>
+		   <span x-show="open" class="text-2xl">&times;</span>
+		 </button>
+	   </div>
+
+	 </nav>
+
+	 <div class="mt-16 w-full grid grid-cols-11 ">
+		<!-- user info -->
+		 <div class="col-span-3 border-r-2 border-gray-300">
+			<div class="container mx-auto px-4 py-20">			
+				<!-- Profile Section -->
+				<div class="md:flex items-center justify-between">
+				  <div class="flex flex-col items-center gap-5 max-w-2xl mb-4 md:mb-0">
+					<div class="w-full flex flex-row justify-between items-center">
+						<div class="h-full w-full max-h-16 max-w-16 md:max-w-24 md:max-h-24 rounded-lg overflow-hidden mb-3 md:mb-0">
+							<img src="./image/avatar1.jpg" alt="photo" class="rounded-2xl shadow-2xl w-full h-full object-cover">
+						  </div>
+						  <button class="w-1/2 md:w-auto bg-gray-800 text-white px-6 py-2 rounded hover:bg-gray-900 flex-shrink-0 shadow-2xl">Profile</button>
+	  
+					</div>
+				
+					<div>
+						
+						  
+						<h5 class="text-lg font-semibold text-blue-gray-800 mb-2 md:mb-0 w-64 text-left break-words">
+							<span id="currentAccount">Not connected</span>
+					  </h5>
+					  <p class="w-full md:w-10/12 font-normal text-gray-500">
+						Dr. Sarah Mitchell is a passionate and accomplished biologist with a deep-rooted fascination for the intricate workings of the natural world.
+					  </p>
+					</div>
+				  </div>
+				</div>
+			  </div>
+		 </div>
+		 <!-- posts -->
+		  <div class="col-span-8 px-4">
+<!-- new post container -->
+
+  <!-- New Comment Container -->
+  <div class="bg-white p-6 rounded-lg shadow mx-auto mb-5">
+        <!-- Comment Input Form -->
+    <div class="mt-4 pl-12">
+      <form action="#" class="flex flex-col items-end">
+        
+        <!-- Textarea -->
+        <textarea 
+		  type="text"
+		  id="postMessage"
+          placeholder="Write a nice post or go home..."
+          class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 text-sm"
+          rows="4"></textarea>
+        
+        <!-- Submit Button -->
+        <button onclick="publishPost();" class="mt-4 px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-800 text-sm">
+          Submit
+        </button>
+
+      </form>
+    </div>
+
+  </div>
+
+
+  <!-- Post Container -->
+  <div class="bg-white shadow rounded-lg p-6 mx-auto grid gap-6">
+    
+    <!-- Post Header -->
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 flex-shrink-0">
+        <img src="./image/avatar1.jpg" alt="img" class="w-full h-full rounded-full object-cover object-center">
+      </div>
+      <div class="flex-1">
+        <span class="text-gray-900 font-bold text-sm">Emma Roberts</span>
+        <span class="text-gray-500 text-xs block">2 hours ago</span>
+      </div>
+      <button id="edit-toggle" class="text-blue-500 text-sm hover:underline">Edit</button>
+    </div>
+
+    <!-- Post Content or Edit Form -->
+    <div id="post-content" class="text-gray-700 text-sm">
+      Dr. Sarah Mitchell is a passionate and accomplished biologist with a deep-rooted fascination for the intricate workings of the natural world.
+    </div>
+    <form id="edit-form" class="hidden">
+      <textarea class="w-full p-3 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none text-sm"
+                rows="4">Dr. Sarah Mitchell is a passionate and accomplished biologist with a deep-rooted fascination for the intricate workings of the natural world.</textarea>
+      <div class="flex justify-end gap-2 mt-2">
+        <button type="button" id="cancel-edit" class="text-gray-600 hover:text-gray-800 text-sm">Cancel</button>
+        <button type="button" id="save-edit" class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">Save</button>
+      </div>
+    </form>
+
+    <!-- Post Actions: Like, Dislike, Comment -->
+    <div class="flex items-center justify-between text-gray-600">
+      <div class="flex gap-4">
+        <!-- Like Button -->
+        <button class="flex items-center gap-1 hover:text-red-500">
+          <i class="fas fa-heart"></i>
+          <span class="text-sm">Like</span>
+          <span class="text-xs ml-1">(12)</span>
+        </button>
+        
+        <!-- Dislike Button -->
+        <button class="flex items-center gap-1 hover:text-blue-500">
+          <i class="fas fa-thumbs-down"></i>
+          <span class="text-sm">Dislike</span>
+          <span class="text-xs ml-1">(3)</span>
+        </button>
+      </div>
+
+      <!-- Comment Button -->
+      <button class="flex items-center gap-1 hover:text-gray-800">
+        <i class="fas fa-comment"></i>
+        <span class="text-sm">Comment</span>
+      </button>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="border-t border-gray-200 pt-4">
+      <!-- Example Comment -->
+      <div class="flex items-start gap-3 mb-4">
+        <div class="w-8 h-8">
+          <img src="./image/avatar1.jpg" alt="avatar" class="w-full h-full rounded-full object-cover">
+        </div>
+        <div class="flex-1">
+          <span class="text-gray-900 font-bold text-sm">John Doe</span>
+          <p class="text-gray-600 text-xs">This is amazing work! Keep it up.</p>
+        </div>
+      </div>
+
+      <!-- Add Comment Input -->
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8">
+          <img src="./image/avatar1.jpg" alt="avatar" class="w-full h-full rounded-full object-cover">
+        </div>
+        <input type="text" placeholder="Write a comment..." class="w-full bg-gray-100 border border-gray-300 rounded-full px-3 py-2 text-sm focus:outline-none focus:border-gray-400">
+      </div>
+    </div>
+
+  </div>
+  <!-- dynamic posts container -->
+  <div id="postsList">
+
+  </div>
+	
+		  </div>
+		
+	 </div>
+     
+    </body>
+
+	<script>
+		const editToggle = document.getElementById("edit-toggle");
+		const postContent = document.getElementById("post-content");
+		const editForm = document.getElementById("edit-form");
+		const cancelEdit = document.getElementById("cancel-edit");
+	
+		editToggle.addEventListener("click", () => {
+		  postContent.classList.toggle("hidden");
+		  editForm.classList.toggle("hidden");
+		});
+	
+		cancelEdit.addEventListener("click", () => {
+		  postContent.classList.remove("hidden");
+		  editForm.classList.add("hidden");
+		});
+	  </script>
+	    <script type="text/javascript">
+			let currentAccount;
+			let contract;
+		
+			async function connectWallet() {
+			  if (window.ethereum) {
+				try {
+				  const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+				  currentAccount = accounts[0];
+				  document.getElementById("currentAccount").innerText = currentAccount;
+				  document.getElementById("connectButton").style.display = "none";
+				  document.getElementById("disconnectButton").style.display = "inline";
+				  await loadWeb3();
+				  await loadContract();
+				  loadPosts();
+				} catch (error) {
+				  console.error("Error connecting wallet:", error);
+				}
+			  } else {
+				alert("Please install MetaMask to use this app!");
+			  }
+			}
+		
+			async function loadWeb3() {
+			  if (window.ethereum) {
+				window.web3 = new Web3(window.ethereum);
+				await window.ethereum.enable();
+			  }
+			}
+		
+			async function loadContract() {
+			  const abi = [
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "postId",
+						"type": "uint256"
+					}
+				],
+				"name": "dislikePost",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "postId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "newMessage",
+						"type": "string"
+					}
+				],
+				"name": "editPost",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "postId",
+						"type": "uint256"
+					}
+				],
+				"name": "likePost",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "postId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "author",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "message",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					}
+				],
+				"name": "PostCreated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "postId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "dislikeCount",
+						"type": "uint256"
+					}
+				],
+				"name": "PostDisliked",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "postId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "likeCount",
+						"type": "uint256"
+					}
+				],
+				"name": "PostLiked",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "postId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "newMessage",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "lastModified",
+						"type": "uint256"
+					}
+				],
+				"name": "PostUpdated",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "_message",
+						"type": "string"
+					}
+				],
+				"name": "publishPost",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "index",
+						"type": "uint256"
+					}
+				],
+				"name": "getPost",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getTotalPosts",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "posts",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "message",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "author",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "likeCount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "dislikeCount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "lastModified",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		];
+			  const contractAddress = "0x72bb9c7ffbE2Ed234e53bc64862DdA6d9fFF333b";
+			  contract = new window.web3.eth.Contract(abi, contractAddress);
+			}
+		
+			
+	async function publishPost() {
+		const message = document.getElementById("postMessage").value;
+		try {
+			await contract.methods.publishPost(message).send({ from: currentAccount });
+			loadPosts();
+		} catch (error) {
+			console.error("Error publishing post:", error);
+		}
+	}
+
+	async function loadPosts() {
+		try {
+			const postCount = await contract.methods.getTotalPosts().call();
+			document.getElementById("postsList").innerHTML = "";
+			for (let i = 0; i < postCount; i++) {
+				const post = await contract.methods.getPost(i).call();
+				displayPost(post, i);
+				console.log(post)
+			}
+		} catch (error) {
+			console.error("Error loading posts:", error);
+		}
+	}
+	function displayPost(post, index) {
+	const postElement = document.createElement("div");
+	postElement.classList.add("post", "border-b", "border-gray-300", "p-4");
+	postElement.innerHTML = `
+		<div class="bg-white shadow rounded-lg p-6 mx-auto grid gap-6">
+			<div class="flex items-center gap-4">
+				<div class="w-10 h-10 flex-shrink-0">
+					<img src="./image/avatar1.jpg" alt="img" class="w-full h-full rounded-full object-cover object-center">
+				</div>
+				<div class="flex-1">
+					<span class="text-gray-900 font-bold text-sm">${post[1]}</span>
+					<span class="text-gray-500 text-xs block">${new Date(post[2] * 1000).toLocaleString()}</span>
+				</div>
+				<button id="edit-toggle" onclick="editPost(${index})" class="text-blue-500 text-sm hover:underline">Edit</button>
+			</div>
+			<div id="post-content" class="text-gray-700 text-sm">${post[0]}</div>
+			<form id="edit-form" class="hidden">
+				<textarea class="w-full p-3 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none text-sm"
+						  rows="4">${post[0]}</textarea>
+				<div class="flex justify-end gap-2 mt-2">
+					<button type="button" id="cancel-edit" class="text-gray-600 hover:text-gray-800 text-sm">Cancel</button>
+					<button type="button" id="save-edit" class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">Save</button>
+				</div>
+			</form>
+			<div class="flex items-center justify-between text-gray-600">
+				<div class="flex gap-4">
+					<button class="flex items-center gap-1 hover:text-red-500" onclick="likePost(${index})">
+						<i class="fas fa-heart"></i>
+						<span class="text-sm">Like</span>
+						<span class="text-xs ml-1">(${post[3]})</span>
+					</button>
+					<button class="flex items-center gap-1 hover:text-blue-500" onclick="dislikePost(${index})">
+						<i class="fas fa-thumbs-down"></i>
+						<span class="text-sm">Dislike</span>
+						<span class="text-xs ml-1">(${post[4]})</span>
+					</button>
+				</div>
+				<button class="flex items-center gap-1 hover:text-gray-800">
+					<i class="fas fa-comment"></i>
+					<span class="text-sm">Comment</span>
+				</button>
+			</div>
+		</div>
+	`;
+	document.getElementById("postsList").appendChild(postElement);
+}
+	async function editPost(postId) {
+	const postElement = document.querySelector(`#postsList .post:nth-child(${postId + 1})`);
+	const postContent = postElement.querySelector("#post-content");
+	const editForm = postElement.querySelector("#edit-form");
+	const cancelButton = editForm.querySelector("#cancel-edit");
+	const saveButton = editForm.querySelector("#save-edit");
+
+	// Show the edit form and hide the post content
+	postContent.classList.add("hidden");
+	editForm.classList.remove("hidden");
+
+	// Cancel button event
+	cancelButton.onclick = () => {
+		editForm.classList.add("hidden");
+		postContent.classList.remove("hidden");
+	};
+
+	// Save button event
+	saveButton.onclick = async () => {
+		const newMessage = editForm.querySelector("textarea").value;
+		if (newMessage) {
+			try {
+				await contract.methods.editPost(postId, newMessage).send({ from: currentAccount });
+				loadPosts(); // Reload posts after successful edit
+			} catch (error) {
+				console.error("Error editing post:", error);
+			}
+		}
+	};
+}
+
+
+	async function likePost(postId) {
+		try {
+			await contract.methods.likePost(postId).send({ from: currentAccount });
+			loadPosts();
+		} catch (error) {
+			console.error("Error liking post:", error);
+		}
+	}
+
+	async function dislikePost(postId) {
+		try {
+			await contract.methods.dislikePost(postId).send({ from: currentAccount });
+			loadPosts();
+		} catch (error) {
+			console.error("Error disliking post:", error);
+		}
+	}
+
+	
+	</script>
+
+  <!-- <script type="text/javascript">
+    let currentAccount;
+    let contract;
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          currentAccount = accounts[0];
+          document.getElementById("currentAccount").innerText = currentAccount;
+          document.getElementById("connectButton").style.display = "none";
+          document.getElementById("disconnectButton").style.display = "inline";
+          document.getElementById("connectionStatus").innerText = "Connected";
+          await loadWeb3();
+          await loadContract();
+          loadPosts();
+        } catch (error) {
+          console.error("Error connecting wallet:", error);
+          updateStatus("Error connecting wallet. Please try again.");
+        }
+      } else {
+        alert("Please install MetaMask to use this app!");
+      }
+    }
+
+    async function disconnectWallet() {
+      // Clear the currentAccount variable
+      currentAccount = null;
+      document.getElementById("currentAccount").innerText = "Not connected";
+      document.getElementById("disconnectButton").style.display = "none";
+      document.getElementById("connectButton").style.display = "inline";
+      document.getElementById("connectionStatus").innerText = "Not connected";
+      // Reload the page to reset the app state
+      location.reload();
+    }
+
+    async function loadWeb3() {
+      if (window.ethereum) {
+        window.web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+      }
+    }
+    async function loadContract() {
+      contract = await new window.web3.eth.Contract(
+        [
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "postId",
+				"type": "uint256"
+			}
+		],
+		"name": "dislikePost",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "postId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "newMessage",
+				"type": "string"
+			}
+		],
+		"name": "editPost",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "postId",
+				"type": "uint256"
+			}
+		],
+		"name": "likePost",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "postId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "author",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "message",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			}
+		],
+		"name": "PostCreated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "postId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "dislikeCount",
+				"type": "uint256"
+			}
+		],
+		"name": "PostDisliked",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "postId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "likeCount",
+				"type": "uint256"
+			}
+		],
+		"name": "PostLiked",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "postId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "newMessage",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "lastModified",
+				"type": "uint256"
+			}
+		],
+		"name": "PostUpdated",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_message",
+				"type": "string"
+			}
+		],
+		"name": "publishPost",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "getPost",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTotalPosts",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "posts",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "message",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "author",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "likeCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "dislikeCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "lastModified",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+],
+        '0x5A86858aA3b595FD6663c2296741eF4cd8BC4d01' 
+      );
+    }
+
+    async function publishPost() {
+      const message = document.getElementById("postMessage").value;
+      if (!message) {
+        updateStatus("Please enter a message to publish.");
+        return;
+      }
+
+      updateStatus("Publishing post...");
+      await contract.methods.publishPost(message).send({ from: currentAccount });
+      updateStatus("Post published!");
+      loadPosts();
+    }
+
+    async function loadPosts() {
+      const postsList = document.getElementById("postsList");
+      postsList.innerHTML = "";
+
+      const totalPosts = await contract.methods.getTotalPosts().call();
+      for (let i = 0; i < totalPosts; i++) {
+        const post = await contract.methods.getPost(i).call();
+        const listItem = document.createElement("li");
+
+        listItem.innerHTML = `
+          <p><strong>Message:</strong> ${post[0]}</p>
+          <p><strong>Author:</strong> ${post[1]}</p>
+          <p><strong>Date:</strong> ${new Date(post[2] * 1000).toLocaleString()}</p>
+          <p><strong>Likes:</strong> ${post[3]} | <strong>Dislikes:</strong> ${post[4]}</p>
+          <p><strong>Last Modified:</strong> ${post[5] > 0 ? new Date(post[5] * 1000).toLocaleString() : "N/A"}</p>
+          <button onclick="likePost(${i})">Like</button>
+          <button onclick="dislikePost(${i})">Dislike</button>
+          ${post[1].toLowerCase() === currentAccount.toLowerCase() ? `<button onclick="editPost(${i})">Edit</button>` : ""}
+        `;
+
+        postsList.appendChild(listItem);
+      }
+    }
+
+    async function likePost(postId) {
+      updateStatus("Liking post...");
+      await contract.methods.likePost(postId).send({ from: currentAccount });
+      updateStatus("Post liked!");
+      loadPosts();
+    }
+
+    async function dislikePost(postId) {
+      updateStatus("Disliking post...");
+      await contract.methods.dislikePost(postId).send({ from: currentAccount });
+      updateStatus("Post disliked!");
+      loadPosts();
+    }
+
+    async function editPost(postId) {
+      const newMessage = prompt("Enter your new message:");
+      if (!newMessage) return;
+
+      updateStatus("Editing post...");
+      await contract.methods.editPost(postId, newMessage).send({ from: currentAccount });
+      updateStatus("Post updated!");
+      loadPosts();
+    }
+
+    function updateStatus(status) {
+      document.getElementById("status").innerText = status;
+      console.log(status);
+    }
+
+    // Load the contract once the page is ready and the user connects their wallet
+    if (window.ethereum) {
+      window.ethereum.on("accountsChanged", function (accounts) {
+        currentAccount = accounts[0];
+        document.getElementById("currentAccount").innerText = currentAccount;
+        loadPosts();
+      });
+    }
+  </script> -->
+</body>
+</html>
